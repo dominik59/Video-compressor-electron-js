@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Drop File Handler</title>
+    <style>
+        #drop_zone {
+            border: 2px dashed #bbb;
+            border-radius: 10px;
+            width: 100%;
+            height: 100%;
+            line-height: 200px;
+            text-align: center;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="drop_zone">Drop files here or click to select</div>
+<input type="file" id="file_input" style="display: none;" />
+
+<script>
+  const { ipcRenderer } = require('electron')
+
+  const dropZone = document.getElementById('drop_zone')
+  const fileInput = document.getElementById('file_input')
+
+  dropZone.addEventListener('click', () => {
+    fileInput.click()
+  })
+
+  function handleFile (file) {
+    new Notification('File selected', { body: file.path })
+    console.log('File Path of selected file: ', file.path)
+    ipcRenderer.send('fileDropped', file.path)
+  }
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0]
+    handleFile(file)
+  })
+
+  dropZone.addEventListener('drop', (event) => {
+    event.preventDefault()
+    event.stopPropagation()
+
+    for (const f of event.dataTransfer.files) {
+      handleFile(f)
+    }
+  })
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  })
+
+  dropZone.addEventListener('dragenter', (event) => {
+    console.log('File is in the Drop Space')
+  })
+
+  dropZone.addEventListener('dragleave', (event) => {
+    console.log('File has left the Drop Space')
+  })
+</script>
+</body>
+
+</html>
